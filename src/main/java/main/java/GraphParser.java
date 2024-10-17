@@ -36,8 +36,20 @@ public class GraphParser {
         });
     }
 
-    public static void main(String[] args) throws IOException {
-        GraphParser parser = new GraphParser();
-        parser.parseGraph("src/main/resources/input.dot");
+    public void addNode(String label) {
+        if (!graph.containsVertex(label)) {
+            graph.addVertex(label);
+            System.out.println("Node added: " + label);
+        } else {
+            System.out.println("Node " + label + " already exists!");
+        }
     }
+
+    public void addNodes(String[] labels) {
+        for (String label : labels) {
+            addNode(label);
+        }
+    }
+
+
 }
