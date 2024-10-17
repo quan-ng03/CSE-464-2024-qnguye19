@@ -3,14 +3,20 @@ package main.java;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.nio.dot.DOTImporter;
+import org.jgrapht.nio.dot.DOTExporter;
+
+import guru.nidi.graphviz.engine.Format;
+import guru.nidi.graphviz.engine.Graphviz;
+import guru.nidi.graphviz.model.Factory;
+import guru.nidi.graphviz.model.Graph;
 
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Scanner;
 
 public class GraphParser {
-    private DefaultDirectedGraph<String, DefaultEdge> graph;
+    private final DefaultDirectedGraph<String, DefaultEdge> graph;
 
     public GraphParser() {
         // Initialize the graph as a directed graph with default edges
@@ -31,9 +37,7 @@ public class GraphParser {
         System.out.println("Number of Nodes: " + graph.vertexSet().size());
         System.out.println("Nodes: " + graph.vertexSet());
         System.out.println("Number of Edges: " + graph.edgeSet().size());
-        graph.edgeSet().forEach(edge -> {
-            System.out.println(graph.getEdgeSource(edge) + " -> " + graph.getEdgeTarget(edge));
-        });
+        graph.edgeSet().forEach(edge -> System.out.println(graph.getEdgeSource(edge) + " -> " + graph.getEdgeTarget(edge)));
     }
 
     // Feature 2: Add nodes to the graph
@@ -65,6 +69,24 @@ public class GraphParser {
         }
     }
 
+    // Feature 4: Output the graph to a DOT file and a PNG image
+    public void outputDOTGraph(String path) throws IOException {
+        DOTExporter<String, DefaultEdge> exporter = new DOTExporter<>();
+        FileWriter writer = new FileWriter(path);
+        exporter.exportGraph(graph, writer);
+        System.out.println("Graph exported to DOT file: " + path);
+    }
 
+    public void outputGraphics(String path, String format) throws IOException {
+        Graph g = Factory.graph(graph.toString()).directed();
+        Graphviz viz = Graphviz.fromGraph(g);
+        if (format.equals("png")) {
+            viz.render(Format.PNG).toFile(new File(path));
+        } else {
+            System.out.println("Unsupported format!");
+            return;
+        }
+        System.out.println("Graph exported to graphics file: " + path);
+    }
 
 }

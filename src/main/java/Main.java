@@ -12,5 +12,10 @@ public class Main {
 
         parser.addEdge("a", "c");
         parser.addEdge("d", "E");
+
+        parser.outputDOTGraph("src/main/resources/output.dot");
+
+        // Export to PNG file
+        parser.outputGraphics("src/main/resources/output.png", "png");
     }
 }
