@@ -9,5 +9,8 @@ public class Main {
 
         parser.addNode("d");
         parser.addNodes(new String[]{"E", "F"});
+
+        parser.addEdge("a", "c");
+        parser.addEdge("d", "E");
     }
 }

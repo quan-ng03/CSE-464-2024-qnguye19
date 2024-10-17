@@ -36,6 +36,7 @@ public class GraphParser {
         });
     }
 
+    // Feature 2: Add nodes to the graph
     public void addNode(String label) {
         if (!graph.containsVertex(label)) {
             graph.addVertex(label);
@@ -50,6 +51,20 @@ public class GraphParser {
             addNode(label);
         }
     }
+
+    // Feature 3: Add edges to the graph
+    public void addEdge(String srcLabel, String dstLabel) {
+        if (!graph.containsVertex(srcLabel) || !graph.containsVertex(dstLabel)) {
+            System.out.println("One of the nodes doesn't exist!");
+        } else {
+            if (graph.addEdge(srcLabel, dstLabel) != null) {
+                System.out.println("Edge added: " + srcLabel + " -> " + dstLabel);
+            } else {
+                System.out.println("Edge already exists!");
+            }
+        }
+    }
+
 
 
 }
