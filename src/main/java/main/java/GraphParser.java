@@ -8,7 +8,7 @@ import org.jgrapht.nio.dot.DOTExporter;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.Factory;
-import guru.nidi.graphviz.model.Graph;
+import guru.nidi.graphviz.model.MutableGraph;
 
 import java.io.File;
 import java.io.FileReader;
@@ -78,12 +78,26 @@ public class GraphParser {
     }
 
     public void outputGraphics(String path, String format) throws IOException {
-        Graph g = Factory.graph(graph.toString()).directed();
+        MutableGraph g = Factory.mutGraph("Graph").setDirected(true);
+
+        // Add all vertices (nodes)
+        for (String vertex : graph.vertexSet()) {
+            g.add(Factory.mutNode(vertex));
+        }
+
+        // Add all edges
+        for (DefaultEdge edge : graph.edgeSet()) {
+            String src = graph.getEdgeSource(edge);
+            String tgt = graph.getEdgeTarget(edge);
+            g.add(Factory.mutNode(src).addLink(Factory.to(Factory.mutNode(tgt))));
+        }
+
+        // Render the graph in the specified format
         Graphviz viz = Graphviz.fromGraph(g);
-        if (format.equals("png")) {
+        if (format.equalsIgnoreCase("png")) {
             viz.render(Format.PNG).toFile(new File(path));
         } else {
-            System.out.println("Unsupported format!");
+            System.out.println("Unsupported format: " + format);
             return;
         }
         System.out.println("Graph exported to graphics file: " + path);
