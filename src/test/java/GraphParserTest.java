@@ -1,6 +1,7 @@
 package test.java;
 
 import main.java.GraphParser;
+import main.java.GraphParser.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -10,9 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class GraphParserTest {
 
@@ -156,4 +155,46 @@ public class GraphParserTest {
                 "Removing an edge with a non-existent destination node should throw an exception.");
     }
 
+    // Test for Graph Search feature
+    @Test
+    public void testGraphSearchPathExists() {
+        parser.addNode("A");
+        parser.addNode("B");
+        parser.addNode("C");
+        parser.addEdge("A", "B");
+        parser.addEdge("B", "C");
+
+        Path path = parser.graphSearch("A", "C");
+        assertNotNull(path, "Path should be found between A and C.");
+        assertEquals("A -> B -> C", path.toString(), "Path should be A -> B -> C.");
+    }
+
+    @Test
+    public void testGraphSearchNoPathExists() {
+        parser.addNode("A");
+        parser.addNode("B");
+        parser.addNode("C");
+        parser.addEdge("A", "B");
+
+        Path path = parser.graphSearch("A", "C");
+        assertNull(path, "No path should exist between A and C.");
+    }
+
+    @Test
+    public void testGraphSearchSingleNodePath() {
+        parser.addNode("A");
+
+        Path path = parser.graphSearch("A", "A");
+        assertNotNull(path, "Path should exist for a node to itself.");
+        assertEquals("A", path.toString(), "Path should be A.");
+    }
+
+    @Test
+    public void testGraphSearchNonExistentNode() {
+        parser.addNode("A");
+        parser.addNode("B");
+
+        Path path = parser.graphSearch("A", "C");
+        assertNull(path, "Path should be null if destination node doesn't exist.");
+    }
 }

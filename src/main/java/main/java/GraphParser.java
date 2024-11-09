@@ -10,6 +10,7 @@ import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.Factory;
 import guru.nidi.graphviz.model.MutableGraph;
 
+import java.util.*;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -25,7 +26,7 @@ public class GraphParser {
         graph = new DefaultDirectedGraph<>(DefaultEdge.class);
     }
 
-    // Feature 1: Parse a DOT graph file and print graph details
+    // Parse a DOT graph file and print graph details
     public void parseGraph(String filepath) throws IOException {
         DOTImporter<String, DefaultEdge> importer = new DOTImporter<>();
         importer.setVertexFactory(String::new);
@@ -42,7 +43,7 @@ public class GraphParser {
         graph.edgeSet().forEach(edge -> System.out.println(graph.getEdgeSource(edge) + " -> " + graph.getEdgeTarget(edge)));
     }
 
-    // Feature 2: Add nodes to the graph
+    // Add nodes to the graph
     public void addNode(String label) {
         if (!graph.containsVertex(label)) {
             graph.addVertex(label);
@@ -58,7 +59,7 @@ public class GraphParser {
         }
     }
 
-    // Feature 3: Add edges to the graph
+    // Add edges to the graph
     public void addEdge(String srcLabel, String dstLabel) {
         if (!graph.containsVertex(srcLabel) || !graph.containsVertex(dstLabel)) {
             System.out.println("One of the nodes doesn't exist!");
@@ -71,7 +72,7 @@ public class GraphParser {
         }
     }
 
-    // Feature 4: Output the graph to a DOT file and a PNG image
+    // Output the graph to a DOT file and a PNG image
     public void outputDOTGraph(String path) throws IOException {
         DOTExporter<String, DefaultEdge> exporter = new DOTExporter<>();
         FileWriter writer = new FileWriter(path);
@@ -105,19 +106,19 @@ public class GraphParser {
         System.out.println("Graph exported to graphics file: " + path);
     }
 
-    // Feature 5: Get the nodes of the graph
+    // Get the nodes of the graph
     public Set<String> getNodes() {
         return graph.vertexSet();
     }
 
-    // Feature 6: Get the edges of the graph
+    // Get the edges of the graph
     public Set<String> getEdges() {
         return graph.edgeSet().stream()
                 .map(edge -> graph.getEdgeSource(edge) + " -> " + graph.getEdgeTarget(edge))
                 .collect(Collectors.toSet());
     }
 
-    // Feature 7: Remove a node from the graph
+    // Remove a node from the graph
     public void removeNode(String label) {
         if (graph.containsVertex(label)) {
             graph.removeVertex(label);
@@ -126,13 +127,13 @@ public class GraphParser {
             throw new IllegalArgumentException("Node " + label + " does not exist!");
         }
     }
-    // Feature 8: Remove multiple nodes from the graph
+    // Remove multiple nodes from the graph
     public void removeNodes(String[] labels) {
         for (String label : labels) {
             removeNode(label);  // Reuse the removeNode method
         }
     }
-    // Feature 9: Remove an edge from the graph
+    // Remove an edge from the graph
     public void removeEdge(String srcLabel, String dstLabel) {
         DefaultEdge edge = graph.getEdge(srcLabel, dstLabel);
         if (edge != null) {
@@ -140,6 +141,60 @@ public class GraphParser {
             System.out.println("Edge removed: " + srcLabel + " -> " + dstLabel);
         } else {
             throw new IllegalArgumentException("Edge " + srcLabel + " -> " + dstLabel + " does not exist!");
+        }
+    }
+
+    // Main search API using BFS
+    public Path graphSearch(String src, String dst) {
+        if (!graph.containsVertex(src) || !graph.containsVertex(dst)) {
+            System.out.println("One or both nodes not present in the graph.");
+            return null;
+        }
+
+        Queue<List<String>> queue = new LinkedList<>();
+        Set<String> visited = new HashSet<>();
+
+        queue.add(Collections.singletonList(src));
+        visited.add(src);
+
+        while (!queue.isEmpty()) {
+            List<String> path = queue.poll();
+            String lastNode = path.get(path.size() - 1);
+
+            if (lastNode.equals(dst)) {
+                return new Path(path);  // Path found
+            }
+
+            for (DefaultEdge edge : graph.outgoingEdgesOf(lastNode)) {
+                String neighbor = graph.getEdgeTarget(edge);
+                if (!visited.contains(neighbor)) {
+                    List<String> newPath = new ArrayList<>(path);
+                    newPath.add(neighbor);
+                    queue.add(newPath);
+                    visited.add(neighbor);
+                }
+            }
+        }
+
+        return null;  // No path found
+    }
+
+    // Define Path class to represent a path in the graph
+    public static class Path {
+        private final List<String> nodes;
+
+        public Path(List<String> nodes) {
+            this.nodes = nodes;
+        }
+
+        @Override
+        public String toString() {
+            return String.join(" -> ", nodes);
+        }
+
+        // Method to retrieve the nodes in the path
+        public List<String> getNodes() {
+            return nodes;
         }
     }
 }
