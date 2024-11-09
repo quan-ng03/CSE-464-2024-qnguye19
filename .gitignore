@@ -2,6 +2,8 @@
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+CSE-464-2024-qnguye19/
+
 
 ### Eclipse ###
 .apt_generated

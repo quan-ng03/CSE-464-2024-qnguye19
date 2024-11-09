@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class GraphParserTest {
 
@@ -105,4 +106,54 @@ public class GraphParserTest {
         // Verify that the PNG file was created
         assertTrue(outputPngFile.exists(), "PNG file should be created.");
     }
+
+    // Test removeNode API
+    @Test
+    public void testRemoveNode() {
+        parser.addNode("A");
+        parser.addNode("B");
+        parser.removeNode("A");
+
+        String expectedNodesAfterRemoval = "[B]";
+        assertEquals(expectedNodesAfterRemoval, parser.getNodes().toString(), "Node A should be removed.");
+    }
+
+    // Test removeNodes API
+    @Test
+    public void testRemoveNodes() {
+        parser.addNodes(new String[]{"A", "B", "C"});
+        parser.removeNodes(new String[]{"A", "C"});
+
+        String expectedNodesAfterRemoval = "[B]";
+        assertEquals(expectedNodesAfterRemoval, parser.getNodes().toString(), "Nodes A and C should be removed.");
+    }
+
+    // Test removeEdge API
+    @Test
+    public void testRemoveEdge() {
+        parser.addNode("A");
+        parser.addNode("B");
+        parser.addEdge("A", "B");
+        parser.removeEdge("A", "B");
+
+        String expectedEdgesAfterRemoval = "[]";
+        assertEquals(expectedEdgesAfterRemoval, parser.getEdges().toString(), "Edge A -> B should be removed.");
+    }
+
+    // Scenario 2: Test removing non-existent nodes
+    @Test
+    public void testRemoveNonExistentNode() {
+        assertThrows(IllegalArgumentException.class, () -> parser.removeNode("X"),
+                "Removing non-existent node should throw an exception.");
+    }
+
+    // Scenario 3: Test removing non-existent edges
+    @Test
+    public void testRemoveNonExistentEdge() {
+        parser.addNode("A");
+        parser.addNode("B");
+        assertThrows(IllegalArgumentException.class, () -> parser.removeEdge("A", "C"),
+                "Removing an edge with a non-existent destination node should throw an exception.");
+    }
+
 }

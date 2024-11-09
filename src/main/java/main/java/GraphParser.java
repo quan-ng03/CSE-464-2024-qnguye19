@@ -117,4 +117,29 @@ public class GraphParser {
                 .collect(Collectors.toSet());
     }
 
+    // Feature 7: Remove a node from the graph
+    public void removeNode(String label) {
+        if (graph.containsVertex(label)) {
+            graph.removeVertex(label);
+            System.out.println("Node removed: " + label);
+        } else {
+            throw new IllegalArgumentException("Node " + label + " does not exist!");
+        }
+    }
+    // Feature 8: Remove multiple nodes from the graph
+    public void removeNodes(String[] labels) {
+        for (String label : labels) {
+            removeNode(label);  // Reuse the removeNode method
+        }
+    }
+    // Feature 9: Remove an edge from the graph
+    public void removeEdge(String srcLabel, String dstLabel) {
+        DefaultEdge edge = graph.getEdge(srcLabel, dstLabel);
+        if (edge != null) {
+            graph.removeEdge(edge);
+            System.out.println("Edge removed: " + srcLabel + " -> " + dstLabel);
+        } else {
+            throw new IllegalArgumentException("Edge " + srcLabel + " -> " + dstLabel + " does not exist!");
+        }
+    }
 }
