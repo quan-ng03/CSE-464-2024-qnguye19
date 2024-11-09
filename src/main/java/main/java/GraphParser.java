@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class GraphParser {
@@ -179,22 +178,41 @@ public class GraphParser {
         return null;  // No path found
     }
 
-    // Define Path class to represent a path in the graph
-    public static class Path {
-        private final List<String> nodes;
+    // DFS-based GraphSearch method
+    public Path GraphSearchDFS(String src, String dst) {
+        Set<String> visited = new HashSet<>();
+        Stack<String> stack = new Stack<>();
+        Path path = new Path();
 
-        public Path(List<String> nodes) {
-            this.nodes = nodes;
-        }
-
-        @Override
-        public String toString() {
-            return String.join(" -> ", nodes);
-        }
-
-        // Method to retrieve the nodes in the path
-        public List<String> getNodes() {
-            return nodes;
+        if (dfs(src, dst, visited, stack, path)) {
+            return path;
+        } else {
+            return null;
         }
     }
+
+    private boolean dfs(String current, String dst, Set<String> visited, Stack<String> stack, Path path) {
+        visited.add(current);
+        stack.push(current);
+
+        if (current.equals(dst)) {
+            for (String node : stack) {
+                path.addNode(node);
+            }
+            return true;
+        }
+
+        for (DefaultEdge edge : graph.outgoingEdgesOf(current)) {
+            String neighbor = graph.getEdgeTarget(edge);
+            if (!visited.contains(neighbor)) {
+                if (dfs(neighbor, dst, visited, stack, path)) {
+                    return true;
+                }
+            }
+        }
+
+        stack.pop();
+        return false;
+    }
+
 }

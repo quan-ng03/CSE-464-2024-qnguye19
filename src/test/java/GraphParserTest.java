@@ -1,7 +1,7 @@
 package test.java;
 
 import main.java.GraphParser;
-import main.java.GraphParser.Path;
+import main.java.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -155,7 +155,7 @@ public class GraphParserTest {
                 "Removing an edge with a non-existent destination node should throw an exception.");
     }
 
-    // Test for Graph Search feature
+    // Test for BFS Graph Search feature
     @Test
     public void testGraphSearchPathExists() {
         parser.addNode("A");
@@ -196,5 +196,30 @@ public class GraphParserTest {
 
         Path path = parser.graphSearch("A", "C");
         assertNull(path, "Path should be null if destination node doesn't exist.");
+    }
+
+    // Test for DFS search feature
+    @Test
+    public void testGraphSearchDFS_PathExists() {
+        parser.addNode("A");
+        parser.addNode("B");
+        parser.addNode("C");
+        parser.addEdge("A", "B");
+        parser.addEdge("B", "C");
+
+        Path path = parser.GraphSearchDFS("A", "C");
+        assertNotNull(path, "Path should exist.");
+        assertEquals("A -> B -> C", path.toString(), "Path should be A -> B -> C.");
+    }
+
+    @Test
+    public void testGraphSearchDFS_NoPath() {
+        parser.addNode("A");
+        parser.addNode("B");
+        parser.addNode("C");
+        parser.addEdge("A", "B");
+
+        Path path = parser.GraphSearchDFS("A", "C");
+        assertNull(path, "Path should not exist.");
     }
 }
