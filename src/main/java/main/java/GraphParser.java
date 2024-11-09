@@ -14,6 +14,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class GraphParser {
     private final DefaultDirectedGraph<String, DefaultEdge> graph;
@@ -101,6 +103,18 @@ public class GraphParser {
             return;
         }
         System.out.println("Graph exported to graphics file: " + path);
+    }
+
+    // Feature 5: Get the nodes of the graph
+    public Set<String> getNodes() {
+        return graph.vertexSet();
+    }
+
+    // Feature 6: Get the edges of the graph
+    public Set<String> getEdges() {
+        return graph.edgeSet().stream()
+                .map(edge -> graph.getEdgeSource(edge) + " -> " + graph.getEdgeTarget(edge))
+                .collect(Collectors.toSet());
     }
 
 }
