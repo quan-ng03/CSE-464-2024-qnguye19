@@ -129,22 +129,28 @@ public class GraphParserTest {
     // Test for BFS Graph Search feature
     @Test
     public void testGraphSearchPathExists() {
-        parser.addNode("A","B","C");
+        // Create a new GraphParser instance
+        GraphParser parser = new GraphParser();
+
+        // Add nodes and edges to the graph
+        parser.addNode("A", "B", "C");
         parser.addEdge("A", "B");
         parser.addEdge("B", "C");
 
-        Path path = parser.graphSearch("A", "C");
-        assertNotNull(path, "Path should be found between A and C.");
-        assertEquals("A -> B -> C", path.toString(), "Path should be A -> B -> C.");
+        // Test BFS implementation
+        GraphParser.BFS bfs = new GraphParser.BFS(parser.getGraph());
+        Path bfsPath = bfs.search("A", "C");
+        assertNotNull(bfsPath, "BFS should find a path between A and C.");
+        assertEquals("A -> B -> C", bfsPath.toString(), "BFS path should be A -> B -> C.");
     }
 
-    @Test
+        @Test
     public void testGraphSearchNoPathExists() {
         parser.addNode("A","B","C");
         parser.addEdge("A", "B");
-
-        Path path = parser.graphSearch("A", "C");
-        assertNull(path, "No path should exist between A and C.");
+        GraphParser.BFS bfs = new GraphParser.BFS(parser.getGraph());
+        Path bfsPath = bfs.search("A", "C");
+        assertNull(bfsPath, "No path should exist between A and C.");
     }
 
     @Test
@@ -167,13 +173,14 @@ public class GraphParserTest {
     // Test for DFS search feature
     @Test
     public void testGraphSearchDFS_PathExists() {
-        parser.addNode("A","B","C");
+        parser.addNode("A", "B", "C");
         parser.addEdge("A", "B");
         parser.addEdge("B", "C");
 
-        Path path = parser.GraphSearchDFS("A", "C");
-        assertNotNull(path, "Path should exist.");
-        assertEquals("A -> B -> C", path.toString(), "Path should be A -> B -> C.");
+        GraphParser.DFS dfs = new GraphParser.DFS(parser.getGraph());
+        Path dfsPath = dfs.search("A", "C");
+        assertNotNull(dfsPath, "DFS should find a path between A and C.");
+        assertEquals("A -> B -> C", dfsPath.toString(), "DFS path should also be A -> B -> C (depends on graph structure).");
     }
 
     @Test
@@ -181,8 +188,9 @@ public class GraphParserTest {
         parser.addNode("A","B","C");
         parser.addEdge("A", "B");
 
-        Path path = parser.GraphSearchDFS("A", "C");
-        assertNull(path, "Path should not exist.");
+        GraphParser.DFS dfs = new GraphParser.DFS(parser.getGraph());
+        Path dfsPath = dfs.search("A", "C");
+        assertNull(dfsPath, "Path should not exist.");
     }
 
     // Test parsing an empty graph

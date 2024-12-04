@@ -1,5 +1,6 @@
 package main.java;
 
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.nio.dot.DOTImporter;
@@ -19,6 +20,10 @@ import java.util.stream.Collectors;
 
 public class GraphParser {
     private final DefaultDirectedGraph<String, DefaultEdge> graph;
+
+    public Graph<String, DefaultEdge> getGraph() {
+        return graph;
+    }
 
     // Utility Method for File Reading
     private FileReader getFileReader(String filePath) throws IOException {
@@ -186,41 +191,101 @@ public class GraphParser {
         return null;  // No path found
     }
 
-    // DFS-based GraphSearch method
-    public Path GraphSearchDFS(String src, String dst) {
-        Set<String> visited = new HashSet<>();
-        Stack<String> stack = new Stack<>();
-        Path path = new Path();
 
-        if (dfs(src, dst, visited, stack, path)) {
-            return path;
-        } else {
-            return null;
+
+    // Base class for the Template Method Pattern
+    public abstract static class GraphSearchTemplate {
+        protected Set<String> visited; // Tracks visited nodes
+        protected Deque<List<String>> nodes; // Abstracted data structure for BFS/DFS
+        protected Graph<String, DefaultEdge> graph; // Graph object
+
+        public GraphSearchTemplate(Graph<String, DefaultEdge> graph) {
+            this.graph = graph;
+            this.visited = new HashSet<>();
         }
-    }
 
-    private boolean dfs(String current, String dst, Set<String> visited, Stack<String> stack, Path path) {
-        visited.add(current);
-        stack.push(current);
-
-        if (current.equals(dst)) {
-            for (String node : stack) {
-                path.addNode(node);
+        // Template method: Defines the skeleton of the algorithm
+        public Path search(String src, String dst) {
+            if (!graph.containsVertex(src) || !graph.containsVertex(dst)) {
+                System.out.println("One or both nodes not present in the graph.");
+                return null;
             }
-            return true;
-        }
 
-        for (DefaultEdge edge : graph.outgoingEdgesOf(current)) {
-            String neighbor = graph.getEdgeTarget(edge);
-            if (!visited.contains(neighbor)) {
-                if (dfs(neighbor, dst, visited, stack, path)) {
-                    return true;
+            initializeSearch(src);
+
+            while (!nodes.isEmpty()) {
+                List<String> path = fetchNextNode();
+                String lastNode = path.get(path.size() - 1);
+
+                if (lastNode.equals(dst)) {
+                    return new Path(path); // Path found
+                }
+
+                for (DefaultEdge edge : graph.outgoingEdgesOf(lastNode)) {
+                    String neighbor = graph.getEdgeTarget(edge);
+                    if (!visited.contains(neighbor)) {
+                        List<String> newPath = new ArrayList<>(path);
+                        newPath.add(neighbor);
+                        addNeighbor(newPath);
+                        visited.add(neighbor);
+                    }
                 }
             }
+
+            return null; // No path found
         }
 
-        stack.pop();
-        return false;
+        // Steps to be implemented by subclasses
+        protected abstract void initializeSearch(String startNode);
+        protected abstract List<String> fetchNextNode();
+        protected abstract void addNeighbor(List<String> neighborPath);
     }
 
+    // BFS Implementation
+    public static class BFS extends GraphSearchTemplate {
+        public BFS(Graph<String, DefaultEdge> graph) {
+            super(graph);
+        }
+
+        @Override
+        protected void initializeSearch(String startNode) {
+            nodes = new ArrayDeque<>(); // Queue
+            nodes.add(Collections.singletonList(startNode));
+            visited.add(startNode);
+        }
+
+        @Override
+        protected List<String> fetchNextNode() {
+            return nodes.poll(); // FIFO
+        }
+
+        @Override
+        protected void addNeighbor(List<String> neighborPath) {
+            nodes.add(neighborPath);
+        }
+    }
+
+    // DFS Implementation
+    public static class DFS extends GraphSearchTemplate {
+        public DFS(Graph<String, DefaultEdge> graph) {
+            super(graph);
+        }
+
+        @Override
+        protected void initializeSearch(String startNode) {
+            nodes = new ArrayDeque<>(); // Stack
+            nodes.push(Collections.singletonList(startNode));
+            visited.add(startNode);
+        }
+
+        @Override
+        protected List<String> fetchNextNode() {
+            return nodes.pop(); // LIFO
+        }
+
+        @Override
+        protected void addNeighbor(List<String> neighborPath) {
+            nodes.push(neighborPath);
+        }
+    }
 }
