@@ -1,4 +1,5 @@
 import main.java.GraphParser;
+import main.java.RandomWalk;
 import main.java.Path;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,6 +9,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -247,4 +250,26 @@ public class GraphParserTest {
                 "Adding edge with non-existent nodes should throw an exception.");
     }
 
+    // Test for random walk functionality
+    @Test
+    public void testRandomWalk() {
+        parser.addNode("A", "B", "C", "D");
+        parser.addEdge("A", "B");
+        parser.addEdge("B", "C");
+        parser.addEdge("C", "D");
+
+        RandomWalk randomWalk = new RandomWalk(parser.getGraph());
+        Path randomWalkPath = randomWalk.search("A", "D");
+
+        // Validate the random walk path
+        assertNotNull(randomWalkPath, "Random walk path should not be null.");
+
+        List<String> pathNodes = randomWalkPath.getNodes();
+        assertTrue(pathNodes.contains("A") && pathNodes.contains("D"),
+                "Path should start at 'A' and end at 'D'.");
+
+        // Ensure the path length is reasonable (e.g., no infinite loops)
+        assertTrue(pathNodes.size() >= 2 && pathNodes.size() <= 100,
+                "The path should contain a reasonable number of nodes.");
+    }
 }

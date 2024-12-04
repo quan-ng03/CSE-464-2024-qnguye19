@@ -257,7 +257,8 @@ public class GraphParser {
 
     public enum Algorithm {
         BFS,
-        DFS
+        DFS,
+        RANDOM_WALK
     }
 
     public Path graphSearch(String src, String dst, Algorithm algo) {
@@ -273,6 +274,7 @@ public class GraphParser {
         GraphSearchTemplate strategy = switch (algo) {
             case BFS -> new BFS(getGraph());
             case DFS -> new DFS(getGraph());
+            case RANDOM_WALK -> new RandomWalk(getGraph());
             default -> throw new IllegalArgumentException("Unsupported algorithm: " + algo);
         };
 
