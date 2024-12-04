@@ -139,12 +139,14 @@ public class GraphParser {
             throw new IllegalArgumentException("Node " + label + " does not exist!");
         }
     }
+
     // Remove multiple nodes from the graph
     public void removeNodes(String[] labels) {
         for (String label : labels) {
             removeNode(label);  // Reuse the removeNode method
         }
     }
+
     // Remove an edge from the graph
     public void removeEdge(String srcLabel, String dstLabel) {
         DefaultEdge edge = graph.getEdge(srcLabel, dstLabel);
@@ -155,42 +157,6 @@ public class GraphParser {
             throw new IllegalArgumentException("Edge " + srcLabel + " -> " + dstLabel + " does not exist!");
         }
     }
-
-    // Main search API using BFS
-    public Path graphSearch(String src, String dst) {
-        if (!graph.containsVertex(src) || !graph.containsVertex(dst)) {
-            System.out.println("One or both nodes not present in the graph.");
-            return null;
-        }
-
-        Queue<List<String>> queue = new LinkedList<>();
-        Set<String> visited = new HashSet<>();
-
-        queue.add(Collections.singletonList(src));
-        visited.add(src);
-
-        while (!queue.isEmpty()) {
-            List<String> path = queue.poll();
-            String lastNode = path.get(path.size() - 1);
-
-            if (lastNode.equals(dst)) {
-                return new Path(path);  // Path found
-            }
-
-            for (DefaultEdge edge : graph.outgoingEdgesOf(lastNode)) {
-                String neighbor = graph.getEdgeTarget(edge);
-                if (!visited.contains(neighbor)) {
-                    List<String> newPath = new ArrayList<>(path);
-                    newPath.add(neighbor);
-                    queue.add(newPath);
-                    visited.add(neighbor);
-                }
-            }
-        }
-
-        return null;  // No path found
-    }
-
 
 
     // Base class for the Template Method Pattern
@@ -288,4 +254,30 @@ public class GraphParser {
             nodes.push(neighborPath);
         }
     }
+
+    public enum Algorithm {
+        BFS,
+        DFS
+    }
+
+    public Path graphSearch(String src, String dst, Algorithm algo) {
+        // Validate input nodes
+        if (!getGraph().containsVertex(src)) {
+            throw new IllegalArgumentException("Source node '" + src + "' does not exist in the graph.");
+        }
+        if (!getGraph().containsVertex(dst)) {
+            throw new IllegalArgumentException("Destination node '" + dst + "' does not exist in the graph.");
+        }
+
+        // Choose the search strategy
+        GraphSearchTemplate strategy = switch (algo) {
+            case BFS -> new BFS(getGraph());
+            case DFS -> new DFS(getGraph());
+            default -> throw new IllegalArgumentException("Unsupported algorithm: " + algo);
+        };
+
+        // Perform the search using the selected strategy
+        return strategy.search(src, dst);
+    }
+
 }
