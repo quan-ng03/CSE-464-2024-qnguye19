@@ -67,7 +67,7 @@ public class GraphParser {
     // Add edges to the graph
     public void addEdge(String srcLabel, String dstLabel) {
         if (!graph.containsVertex(srcLabel) || !graph.containsVertex(dstLabel)) {
-            System.out.println("One of the nodes doesn't exist!");
+            throw new IllegalArgumentException("One or both nodes do not exist: " + srcLabel + ", " + dstLabel);
         } else {
             if (graph.addEdge(srcLabel, dstLabel) != null) {
                 System.out.println("Edge added: " + srcLabel + " -> " + dstLabel);

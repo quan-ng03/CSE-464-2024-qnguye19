@@ -205,4 +205,59 @@ public class GraphParserTest {
         Path path = parser.GraphSearchDFS("A", "C");
         assertNull(path, "Path should not exist.");
     }
+
+    // Test parsing an empty graph
+    @Test
+    public void testParseEmptyGraph() throws IOException {
+        File inputDotFile = new File(tempDir, "empty.dot");
+        try (FileWriter writer = new FileWriter(inputDotFile)) {
+            writer.write("digraph G {}");
+        }
+
+        parser.parseGraph(inputDotFile.getAbsolutePath());
+
+        String expectedOutput = "Number of Nodes: 0\n" +
+                "Nodes: []\n" +
+                "Number of Edges: 0\n";
+    }
+
+    @Test
+    public void testParseCyclicGraph() throws IOException {
+        File inputDotFile = new File(tempDir, "cyclic.dot");
+        try (FileWriter writer = new FileWriter(inputDotFile)) {
+            writer.write("digraph G { a -> b; b -> c; c -> a; }");
+        }
+
+        parser.parseGraph(inputDotFile.getAbsolutePath());
+
+        String expectedOutput = "Number of Nodes: 3\n" +
+                "Nodes: [a, b, c]\n" +
+                "Number of Edges: 3\n" +
+                "a -> b\nb -> c\nc -> a\n";
+    }
+
+    // Test BFS for a large graph
+    @Test
+    public void testGraphSearchLargeGraph() {
+        for (int i = 0; i < 1000; i++) {
+            parser.addNode("Node" + i);
+            if (i > 0) {
+                parser.addEdge("Node" + (i - 1), "Node" + i);
+            }
+        }
+
+        Path path = parser.graphSearch("Node0", "Node999");
+        assertNotNull(path, "Path should exist in a large graph.");
+        assertTrue(path.toString().startsWith("Node0 ->"), "Path should start with Node0.");
+    }
+
+    // Test invalid input for graph operations
+    @Test
+    public void testAddEdgeWithNonExistentNodes() {
+        GraphParser parser = new GraphParser();
+
+        assertThrows(IllegalArgumentException.class, () -> parser.addEdge("A", "B"),
+                "Adding edge with non-existent nodes should throw an exception.");
+    }
+
 }
