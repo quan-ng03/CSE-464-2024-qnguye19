@@ -14,7 +14,7 @@ public class Main {
         System.out.println("Performing Random Walk Searches:");
         RandomWalk randomWalk = new RandomWalk(parser.getGraph());
         String src = "a";
-        String dst = "h";
+        String dst = "c";
 
         for (int i = 0; i < 3; i++) { // Run multiple random walks to test randomness
             System.out.println("Random Walk #" + (i + 1));
