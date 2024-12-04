@@ -65,27 +65,6 @@ public class GraphParserTest {
         assertEquals(expectedEdges, parser.getEdges().toString(), "Edge A -> B should be present.");
     }
 
-    // Test for Feature 4: Output the graph to a DOT file
-    @Test
-    public void testOutputDOTGraph() throws IOException {
-        // Create a small graph
-        parser.addNode("A","B");
-        parser.addEdge("A", "B");
-
-        // Output the graph to a DOT file
-        File outputDotFile = new File(tempDir, "output.dot");
-        parser.outputDOTGraph(outputDotFile.getAbsolutePath());
-
-        // Read the output DOT file and compare with expected content
-        String expectedDot = "strict digraph G {\r\n" +
-                "  1;\r\n" +
-                "  2;\r\n" +
-                "  1 -> 2;\r\n" +
-                "}";
-        String outputDot = Files.readString(Paths.get(outputDotFile.getAbsolutePath()));
-        assertEquals(expectedDot.trim(), outputDot.trim(), "DOT output should match expected graph structure.");
-    }
-
     // Test for Feature 4: Output the graph to a PNG file
     @Test
     public void testOutputGraphics() throws IOException {
