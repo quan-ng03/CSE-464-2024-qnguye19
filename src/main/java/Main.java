@@ -7,8 +7,8 @@ public class Main {
         GraphParser parser = new GraphParser();
         parser.parseGraph("src/main/resources/input.dot");
 
-        parser.addNode("d");
-        parser.addNodes(new String[]{"E", "F"});
+        parser.addNode("d","z","x","y");
+        parser.addNode("E","F");
 
         parser.addEdge("a", "c");
         parser.addEdge("d", "E");

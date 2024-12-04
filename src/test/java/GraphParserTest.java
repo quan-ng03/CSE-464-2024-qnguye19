@@ -47,9 +47,7 @@ public class GraphParserTest {
     // Test for Feature 2: Add nodes to the graph
     @Test
     public void testAddNode() {
-        parser.addNode("A");
-        parser.addNode("B");
-        parser.addNode("A");  // Adding duplicate node should print a warning
+        parser.addNode("A","B","A"); // Adding duplicate node should print a warning
 
         // Check if nodes were added correctly
         String expectedNodes = "[A, B]";
@@ -59,8 +57,7 @@ public class GraphParserTest {
     // Test for Feature 3: Add edges to the graph
     @Test
     public void testAddEdge() {
-        parser.addNode("A");
-        parser.addNode("B");
+        parser.addNode("A","B");
         parser.addEdge("A", "B");
 
         // Check if edges were added correctly
@@ -72,8 +69,7 @@ public class GraphParserTest {
     @Test
     public void testOutputDOTGraph() throws IOException {
         // Create a small graph
-        parser.addNode("A");
-        parser.addNode("B");
+        parser.addNode("A","B");
         parser.addEdge("A", "B");
 
         // Output the graph to a DOT file
@@ -94,8 +90,7 @@ public class GraphParserTest {
     @Test
     public void testOutputGraphics() throws IOException {
         // Create a small graph
-        parser.addNode("A");
-        parser.addNode("B");
+        parser.addNode("A","B");
         parser.addEdge("A", "B");
 
         // Output the graph to a PNG file
@@ -109,8 +104,7 @@ public class GraphParserTest {
     // Test removeNode API
     @Test
     public void testRemoveNode() {
-        parser.addNode("A");
-        parser.addNode("B");
+        parser.addNode("A","B");
         parser.removeNode("A");
 
         String expectedNodesAfterRemoval = "[B]";
@@ -120,7 +114,7 @@ public class GraphParserTest {
     // Test removeNodes API
     @Test
     public void testRemoveNodes() {
-        parser.addNodes(new String[]{"A", "B", "C"});
+        parser.addNode("A","B","C");
         parser.removeNodes(new String[]{"A", "C"});
 
         String expectedNodesAfterRemoval = "[B]";
@@ -130,8 +124,7 @@ public class GraphParserTest {
     // Test removeEdge API
     @Test
     public void testRemoveEdge() {
-        parser.addNode("A");
-        parser.addNode("B");
+        parser.addNode("A","B");
         parser.addEdge("A", "B");
         parser.removeEdge("A", "B");
 
@@ -149,8 +142,7 @@ public class GraphParserTest {
     // Scenario 3: Test removing non-existent edges
     @Test
     public void testRemoveNonExistentEdge() {
-        parser.addNode("A");
-        parser.addNode("B");
+        parser.addNode("A","B");
         assertThrows(IllegalArgumentException.class, () -> parser.removeEdge("A", "C"),
                 "Removing an edge with a non-existent destination node should throw an exception.");
     }
@@ -158,9 +150,7 @@ public class GraphParserTest {
     // Test for BFS Graph Search feature
     @Test
     public void testGraphSearchPathExists() {
-        parser.addNode("A");
-        parser.addNode("B");
-        parser.addNode("C");
+        parser.addNode("A","B","C");
         parser.addEdge("A", "B");
         parser.addEdge("B", "C");
 
@@ -171,9 +161,7 @@ public class GraphParserTest {
 
     @Test
     public void testGraphSearchNoPathExists() {
-        parser.addNode("A");
-        parser.addNode("B");
-        parser.addNode("C");
+        parser.addNode("A","B","C");
         parser.addEdge("A", "B");
 
         Path path = parser.graphSearch("A", "C");
@@ -191,8 +179,7 @@ public class GraphParserTest {
 
     @Test
     public void testGraphSearchNonExistentNode() {
-        parser.addNode("A");
-        parser.addNode("B");
+        parser.addNode("A","B");
 
         Path path = parser.graphSearch("A", "C");
         assertNull(path, "Path should be null if destination node doesn't exist.");
@@ -201,9 +188,7 @@ public class GraphParserTest {
     // Test for DFS search feature
     @Test
     public void testGraphSearchDFS_PathExists() {
-        parser.addNode("A");
-        parser.addNode("B");
-        parser.addNode("C");
+        parser.addNode("A","B","C");
         parser.addEdge("A", "B");
         parser.addEdge("B", "C");
 
@@ -214,9 +199,7 @@ public class GraphParserTest {
 
     @Test
     public void testGraphSearchDFS_NoPath() {
-        parser.addNode("A");
-        parser.addNode("B");
-        parser.addNode("C");
+        parser.addNode("A","B","C");
         parser.addEdge("A", "B");
 
         Path path = parser.GraphSearchDFS("A", "C");

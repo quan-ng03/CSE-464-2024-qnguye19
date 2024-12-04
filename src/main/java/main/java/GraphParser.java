@@ -53,18 +53,14 @@ public class GraphParser {
     }
 
     // Add nodes to the graph
-    public void addNode(String label) {
-        if (!graph.containsVertex(label)) {
-            graph.addVertex(label);
-            System.out.println("Node added: " + label);
-        } else {
-            System.out.println("Node " + label + " already exists!");
-        }
-    }
-
-    public void addNodes(String[] labels) {
+    public void addNode(String... labels) {
         for (String label : labels) {
-            addNode(label);
+            if (!graph.containsVertex(label)) {
+                graph.addVertex(label);
+                System.out.println("Node added: " + label);
+            } else {
+                System.out.println("Node " + label + " already exists!");
+            }
         }
     }
 
