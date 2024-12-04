@@ -4,10 +4,12 @@ on:
   push:
     branches:
       - main
+      - refractor
       - 'fix-*'  # This pattern will trigger on branches that start with "fix-"
   pull_request:
     branches:
       - main
+      - refractor
 
 jobs:
   build:
