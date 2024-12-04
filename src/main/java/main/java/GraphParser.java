@@ -74,10 +74,12 @@ public class GraphParser {
     // Output the graph to a DOT file and a PNG image
     public void outputDOTGraph(String path) throws IOException {
         DOTExporter<String, DefaultEdge> exporter = new DOTExporter<>();
-        FileWriter writer = new FileWriter(path);
-        exporter.exportGraph(graph, writer);
-        System.out.println("Graph exported to DOT file: " + path);
+        try (FileWriter writer = new FileWriter(path)) {
+            exporter.exportGraph(graph, writer);
+            System.out.println("Graph exported to DOT file: " + path);
+        }
     }
+
 
     public void outputGraphics(String path, String format) throws IOException {
         MutableGraph g = Factory.mutGraph("Graph").setDirected(true);

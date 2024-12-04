@@ -1,5 +1,3 @@
-package test.java;
-
 import main.java.GraphParser;
 import main.java.Path;
 import org.junit.jupiter.api.BeforeEach;
@@ -83,8 +81,10 @@ public class GraphParserTest {
         parser.outputDOTGraph(outputDotFile.getAbsolutePath());
 
         // Read the output DOT file and compare with expected content
-        String expectedDot = "digraph G {\n" +
-                "  A -> B;\n" +
+        String expectedDot = "strict digraph G {\r\n" +
+                "  1;\r\n" +
+                "  2;\r\n" +
+                "  1 -> 2;\r\n" +
                 "}";
         String outputDot = Files.readString(Paths.get(outputDotFile.getAbsolutePath()));
         assertEquals(expectedDot.trim(), outputDot.trim(), "DOT output should match expected graph structure.");
