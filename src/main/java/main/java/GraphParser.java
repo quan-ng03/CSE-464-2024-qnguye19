@@ -20,6 +20,16 @@ import java.util.stream.Collectors;
 public class GraphParser {
     private final DefaultDirectedGraph<String, DefaultEdge> graph;
 
+    // Utility Method for File Reading
+    private FileReader getFileReader(String filePath) throws IOException {
+        return new FileReader(filePath);
+    }
+
+    // Utility Method for File Writing
+    private FileWriter getFileWriter(String filePath) throws IOException {
+        return new FileWriter(filePath);
+    }
+
     public GraphParser() {
         // Initialize the graph as a directed graph with default edges
         graph = new DefaultDirectedGraph<>(DefaultEdge.class);
@@ -31,7 +41,7 @@ public class GraphParser {
         importer.setVertexFactory(String::new);
 
         // Use FileReader to read the DOT file
-        try (FileReader fileReader = new FileReader(filepath)) {
+        try (FileReader fileReader = getFileReader(filepath)) {
             importer.importGraph(graph, fileReader);
         }
 
@@ -74,7 +84,7 @@ public class GraphParser {
     // Output the graph to a DOT file and a PNG image
     public void outputDOTGraph(String path) throws IOException {
         DOTExporter<String, DefaultEdge> exporter = new DOTExporter<>();
-        try (FileWriter writer = new FileWriter(path)) {
+        try (FileWriter writer = getFileWriter(path)) {
             exporter.exportGraph(graph, writer);
             System.out.println("Graph exported to DOT file: " + path);
         }
