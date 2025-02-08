@@ -1,5 +1,6 @@
 package main.java;
 
+import org.jgrapht.Graph;
 import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.nio.dot.DOTImporter;
@@ -20,6 +21,20 @@ import java.util.stream.Collectors;
 public class GraphParser {
     private final DefaultDirectedGraph<String, DefaultEdge> graph;
 
+    public Graph<String, DefaultEdge> getGraph() {
+        return graph;
+    }
+
+    // Utility Method for File Reading
+    private FileReader getFileReader(String filePath) throws IOException {
+        return new FileReader(filePath);
+    }
+
+    // Utility Method for File Writing
+    private FileWriter getFileWriter(String filePath) throws IOException {
+        return new FileWriter(filePath);
+    }
+
     public GraphParser() {
         // Initialize the graph as a directed graph with default edges
         graph = new DefaultDirectedGraph<>(DefaultEdge.class);
@@ -31,7 +46,7 @@ public class GraphParser {
         importer.setVertexFactory(String::new);
 
         // Use FileReader to read the DOT file
-        try (FileReader fileReader = new FileReader(filepath)) {
+        try (FileReader fileReader = getFileReader(filepath)) {
             importer.importGraph(graph, fileReader);
         }
 
@@ -43,25 +58,21 @@ public class GraphParser {
     }
 
     // Add nodes to the graph
-    public void addNode(String label) {
-        if (!graph.containsVertex(label)) {
-            graph.addVertex(label);
-            System.out.println("Node added: " + label);
-        } else {
-            System.out.println("Node " + label + " already exists!");
-        }
-    }
-
-    public void addNodes(String[] labels) {
+    public void addNode(String... labels) {
         for (String label : labels) {
-            addNode(label);
+            if (!graph.containsVertex(label)) {
+                graph.addVertex(label);
+                System.out.println("Node added: " + label);
+            } else {
+                System.out.println("Node " + label + " already exists!");
+            }
         }
     }
 
     // Add edges to the graph
     public void addEdge(String srcLabel, String dstLabel) {
         if (!graph.containsVertex(srcLabel) || !graph.containsVertex(dstLabel)) {
-            System.out.println("One of the nodes doesn't exist!");
+            throw new IllegalArgumentException("One or both nodes do not exist: " + srcLabel + ", " + dstLabel);
         } else {
             if (graph.addEdge(srcLabel, dstLabel) != null) {
                 System.out.println("Edge added: " + srcLabel + " -> " + dstLabel);
@@ -74,10 +85,12 @@ public class GraphParser {
     // Output the graph to a DOT file and a PNG image
     public void outputDOTGraph(String path) throws IOException {
         DOTExporter<String, DefaultEdge> exporter = new DOTExporter<>();
-        FileWriter writer = new FileWriter(path);
-        exporter.exportGraph(graph, writer);
-        System.out.println("Graph exported to DOT file: " + path);
+        try (FileWriter writer = getFileWriter(path)) {
+            exporter.exportGraph(graph, writer);
+            System.out.println("Graph exported to DOT file: " + path);
+        }
     }
+
 
     public void outputGraphics(String path, String format) throws IOException {
         MutableGraph g = Factory.mutGraph("Graph").setDirected(true);
@@ -126,12 +139,14 @@ public class GraphParser {
             throw new IllegalArgumentException("Node " + label + " does not exist!");
         }
     }
+
     // Remove multiple nodes from the graph
     public void removeNodes(String[] labels) {
         for (String label : labels) {
             removeNode(label);  // Reuse the removeNode method
         }
     }
+
     // Remove an edge from the graph
     public void removeEdge(String srcLabel, String dstLabel) {
         DefaultEdge edge = graph.getEdge(srcLabel, dstLabel);
@@ -143,76 +158,128 @@ public class GraphParser {
         }
     }
 
-    // Main search API using BFS
-    public Path graphSearch(String src, String dst) {
-        if (!graph.containsVertex(src) || !graph.containsVertex(dst)) {
-            System.out.println("One or both nodes not present in the graph.");
-            return null;
+
+    // Base class for the Template Method Pattern
+    public abstract static class GraphSearchTemplate {
+        protected Set<String> visited; // Tracks visited nodes
+        protected Deque<List<String>> nodes; // Abstracted data structure for BFS/DFS
+        protected Graph<String, DefaultEdge> graph; // Graph object
+
+        public GraphSearchTemplate(Graph<String, DefaultEdge> graph) {
+            this.graph = graph;
+            this.visited = new HashSet<>();
         }
 
-        Queue<List<String>> queue = new LinkedList<>();
-        Set<String> visited = new HashSet<>();
-
-        queue.add(Collections.singletonList(src));
-        visited.add(src);
-
-        while (!queue.isEmpty()) {
-            List<String> path = queue.poll();
-            String lastNode = path.get(path.size() - 1);
-
-            if (lastNode.equals(dst)) {
-                return new Path(path);  // Path found
+        // Template method: Defines the skeleton of the algorithm
+        public Path search(String src, String dst) {
+            if (!graph.containsVertex(src) || !graph.containsVertex(dst)) {
+                System.out.println("One or both nodes not present in the graph.");
+                return null;
             }
 
-            for (DefaultEdge edge : graph.outgoingEdgesOf(lastNode)) {
-                String neighbor = graph.getEdgeTarget(edge);
-                if (!visited.contains(neighbor)) {
-                    List<String> newPath = new ArrayList<>(path);
-                    newPath.add(neighbor);
-                    queue.add(newPath);
-                    visited.add(neighbor);
+            initializeSearch(src);
+
+            while (!nodes.isEmpty()) {
+                List<String> path = fetchNextNode();
+                String lastNode = path.get(path.size() - 1);
+
+                if (lastNode.equals(dst)) {
+                    return new Path(path); // Path found
+                }
+
+                for (DefaultEdge edge : graph.outgoingEdgesOf(lastNode)) {
+                    String neighbor = graph.getEdgeTarget(edge);
+                    if (!visited.contains(neighbor)) {
+                        List<String> newPath = new ArrayList<>(path);
+                        newPath.add(neighbor);
+                        addNeighbor(newPath);
+                        visited.add(neighbor);
+                    }
                 }
             }
+
+            return null; // No path found
         }
 
-        return null;  // No path found
+        // Steps to be implemented by subclasses
+        protected abstract void initializeSearch(String startNode);
+        protected abstract List<String> fetchNextNode();
+        protected abstract void addNeighbor(List<String> neighborPath);
     }
 
-    // DFS-based GraphSearch method
-    public Path GraphSearchDFS(String src, String dst) {
-        Set<String> visited = new HashSet<>();
-        Stack<String> stack = new Stack<>();
-        Path path = new Path();
+    // BFS Implementation
+    public static class BFS extends GraphSearchTemplate {
+        public BFS(Graph<String, DefaultEdge> graph) {
+            super(graph);
+        }
 
-        if (dfs(src, dst, visited, stack, path)) {
-            return path;
-        } else {
-            return null;
+        @Override
+        protected void initializeSearch(String startNode) {
+            nodes = new ArrayDeque<>(); // Queue
+            nodes.add(Collections.singletonList(startNode));
+            visited.add(startNode);
+        }
+
+        @Override
+        protected List<String> fetchNextNode() {
+            return nodes.poll(); // FIFO
+        }
+
+        @Override
+        protected void addNeighbor(List<String> neighborPath) {
+            nodes.add(neighborPath);
         }
     }
 
-    private boolean dfs(String current, String dst, Set<String> visited, Stack<String> stack, Path path) {
-        visited.add(current);
-        stack.push(current);
-
-        if (current.equals(dst)) {
-            for (String node : stack) {
-                path.addNode(node);
-            }
-            return true;
+    // DFS Implementation
+    public static class DFS extends GraphSearchTemplate {
+        public DFS(Graph<String, DefaultEdge> graph) {
+            super(graph);
         }
 
-        for (DefaultEdge edge : graph.outgoingEdgesOf(current)) {
-            String neighbor = graph.getEdgeTarget(edge);
-            if (!visited.contains(neighbor)) {
-                if (dfs(neighbor, dst, visited, stack, path)) {
-                    return true;
-                }
-            }
+        @Override
+        protected void initializeSearch(String startNode) {
+            nodes = new ArrayDeque<>(); // Stack
+            nodes.push(Collections.singletonList(startNode));
+            visited.add(startNode);
         }
 
-        stack.pop();
-        return false;
+        @Override
+        protected List<String> fetchNextNode() {
+            return nodes.pop(); // LIFO
+        }
+
+        @Override
+        protected void addNeighbor(List<String> neighborPath) {
+            nodes.push(neighborPath);
+        }
+    }
+
+    public enum Algorithm {
+        BFS,
+        DFS,
+        RANDOM_WALK
+    }
+
+    public Path graphSearch(String src, String dst, Algorithm algo) {
+        // Validate input nodes
+        if (!getGraph().containsVertex(src)) {
+            throw new IllegalArgumentException("Source node '" + src + "' does not exist in the graph.");
+        }
+        if (!getGraph().containsVertex(dst)) {
+            throw new IllegalArgumentException("Destination node '" + dst + "' does not exist in the graph.");
+        }
+
+        // Choose the search strategy
+        GraphSearchTemplate strategy = switch (algo) {
+            case BFS -> new BFS(getGraph());
+            case DFS -> new DFS(getGraph());
+            case RANDOM_WALK -> new RandomWalk(getGraph());
+            default -> throw new IllegalArgumentException("Unsupported algorithm: " + algo);
+        };
+
+        // Perform the search using the selected strategy
+        return strategy.search(src, dst);
     }
 
 }
