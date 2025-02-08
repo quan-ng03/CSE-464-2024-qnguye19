@@ -1,4 +1,4 @@
-Welcome to my GraphParser.
+Welcome to G-View! This Java application, built with Maven, displays the visual representation of different graphs, including DFS, BFS, and Binary Trees!
 
 After cloning, if you have trouble with libraries from JGraphT, please go into External Libraries -> Find Maven: org.jgrapht:jgrapht-io:1.5.2 -> org.jgrapht -> nio -> dot -> Open DOTImporter and DOTExporter and Download Resources.
 
